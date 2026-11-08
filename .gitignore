@@ -1,0 +1,9 @@
+.env
+__pycache__/
+.pytest_cache/
+.venv/
+data/erp.db
+data/sync_state.json
+output/
+.sfdx/
+.sf/

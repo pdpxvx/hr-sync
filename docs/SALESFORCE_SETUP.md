@@ -48,7 +48,21 @@ format `PL-{0000}`.
 > Si en crear un camp Salesforce et proposa un API name diferent, corregeix-lo perquè coincideixi
 > exactament amb el de la taula. El codi en depèn.
 
-## 5. Flow: estat del candidat
+## 5. Permisos (permission set)
+
+En els orgs nous, els permisos dels objectes personalitzats venen desactivats per defecte.
+
+1. *Setup → Permission Sets → New*. Label `HR Sync`, License `--None--`, i desa'l.
+2. *Object Settings → Candidates → Edit*: pestanya *Available* i *Visible*; totes les
+   *Object Permissions*; *Edit Access* a tots els camps.
+3. Fes el mateix amb *Placements*.
+4. *Accounts*: com a mínim *Read*, *Create* i *Edit*, i *Edit Access* a `ERP Id`, `CIF`,
+   `Active Placements` i `Billing Address`.
+5. *System Permissions → Edit*: marca **Use Any API Auth**. És necessari per a l'opció A de
+   credencials, la del punt 8.
+6. *Manage Assignments → Add Assignment*: assigna-te'l.
+
+## 6. Flow: estat del candidat
 
 *Setup → Flows → New Flow → Record-Triggered Flow*
 
@@ -64,7 +78,7 @@ format `PL-{0000}`.
 tanca un, el Flow el posarà a `Available` igualment. La solució seria comprovar abans si en té
 algun altre d'actiu, amb un *Get Records* al Flow o amb Apex.
 
-## 6. Trigger d'Apex
+## 7. Trigger d'Apex
 
 **Opció ràpida:** *Developer Console → File → New*. Enganxa-hi les dues classes de
 `salesforce/force-app/main/default/classes/` i el trigger de `.../triggers/`. Després executa el test
@@ -79,13 +93,16 @@ sf project deploy start --target-org hrsync
 sf apex run test --class-names PlacementTriggerHandlerTest --target-org hrsync --result-format human
 ```
 
-## 7. Credencials per a la sincronització
+## 8. Credencials per a la sincronització
 
 Copia `.env.example` a `.env` i omple'l amb una de les dues opcions:
 
 - **Usuari + contrasenya + security token.** El token el reps per email des de
-  *(el teu avatar) → Settings → Reset My Security Token*. Si l'org té bloquejat aquest tipus
-  d'inici de sessió, fes servir l'opció següent.
+  *(el teu avatar) → Settings → Reset My Security Token*. En els orgs nous aquest tipus d'inici
+  de sessió (SOAP API `login()`) ve desactivat: si el *Login History* mostra
+  *"Failed: SOAP Login Disabled"*, activa'l a *Setup → User Interface → Enable SOAP API login()*
+  i comprova que tens el permís *Use Any API Auth* del punt 5. Salesforce retirarà aquest mètode
+  a Summer '27.
 - **OAuth Client Credentials.** Crea una app connectada (o *External Client App*) amb el flux
   *Client Credentials* activat i un usuari d'execució assignat. Posa `SF_CONSUMER_KEY`,
   `SF_CONSUMER_SECRET` i `SF_DOMAIN` (per exemple `elteudomini-dev-ed.develop.my`).
